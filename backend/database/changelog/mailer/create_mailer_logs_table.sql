@@ -1,0 +1,9 @@
+CREATE TABLE "public"."mailer_logs"
+(
+    id SERIAL NOT NULL PRIMARY KEY,
+    type VARCHAR(100) NOT NULL,
+    payload TEXT NOT NULL,
+    status VARCHAR(100) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

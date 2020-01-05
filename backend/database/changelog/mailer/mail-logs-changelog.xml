@@ -1,0 +1,15 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="1" author="SIENA" runOnChange="true">
+        <sqlFile encoding="utf8" relativeToChangelogFile="true" stripComments="true"
+                 path="./create_mailer_logs_table.sql" />
+        <rollback>
+            <dropTable cascadeConstraints="true" schemaName="public" tableName="mailer_logs"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

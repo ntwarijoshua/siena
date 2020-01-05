@@ -1,0 +1,53 @@
+version: '3.2'
+
+services:
+    siena-db:
+        build:
+            context: ./backend
+            dockerfile: ./dockerfiles/postgres/Dockerfile
+        image: siena_db
+        volumes:
+            - ./logs/psql:/var/log/postgresql
+            - siena-data:/var/lib/postgresql
+        ports:
+            - "5435:5432"
+#    siena-web:
+#        build:
+#            context: ./frontend
+#            dockerfile: ./dockerfiles/Dockerfile
+#        ports:
+#            - 8080:80
+#    siena-api:
+#        build:
+#            context: ./backend
+#            dockerfile: ./dockerfiles/app/Dockerfile
+#        depends_on:
+#            - siena-db
+#        volumes:
+#            - ./backend/logs:/app/logs
+#        ports:
+#            - "8090:8090"
+    siena-nsqlookupd:
+        image: nsqio/nsq
+        command: /nsqlookupd --broadcast-address=siena-nsqlookupd
+        ports:
+            - "4160:4160"
+            - "4161:4161"
+    siena-nsqd:
+        image: nsqio/nsq
+        command: /nsqd --broadcast-address=siena-nsqd --lookupd-tcp-address=siena-nsqlookupd:4160
+        ports:
+          - "4150:4150"
+          - "4151:4151"
+        depends_on:
+          - siena-nsqlookupd
+    siena-nsqadmin:
+        image: nsqio/nsq
+        command: /nsqadmin --lookupd-http-address=siena-nsqlookupd:4161
+        ports:
+            - "4171:4171"
+        depends_on:
+          - siena-nsqlookupd
+volumes:
+    siena-data:
+        external: false

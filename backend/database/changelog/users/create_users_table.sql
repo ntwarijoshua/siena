@@ -1,0 +1,14 @@
+CREATE TABLE "public"."users"
+(
+    id SERIAL NOT NULL PRIMARY KEY,
+    email VARCHAR(100) NOT NULL UNIQUE ,
+    password VARCHAR(1024) NOT NULL,
+    confirmed BOOLEAN DEFAULT FALSE,
+    profile_id INT NOT NULL,
+    role_id INT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (profile_id) REFERENCES profiles (id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+);
