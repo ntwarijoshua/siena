@@ -6,6 +6,7 @@ import (
 	"github.com/ntwarijoshua/siena/internal/models"
 	"github.com/ntwarijoshua/siena/internal/services"
 	logger "github.com/sirupsen/logrus"
+	"github.com/volatiletech/null"
 	"net/http"
 	"time"
 )
@@ -55,9 +56,9 @@ func (app *App)CreateUser(c *gin.Context) {
 	}
 
 	profile := models.Profile{
-		Names:   payload.Names,
-		TagLine: "",
-		DOB:     dob,
+		Names:   null.StringFrom(payload.Names),
+		TagLine: null.StringFrom(""),
+		DateOfBirth:     null.TimeFrom(dob),
 	}
 	newUser, err := userService.CreateUser(user, profile)
 

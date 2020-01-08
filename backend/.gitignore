@@ -1,3 +1,6 @@
 .env
 logs
 database/liquibase.properties
+cmd/Debug
+dockerfiles/postgres/creds.env
+sqlboiler.toml

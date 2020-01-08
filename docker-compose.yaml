@@ -2,6 +2,8 @@ version: '3.2'
 
 services:
     siena-db:
+        env_file:
+          - ./backend/dockerfiles/postgres/creds.env
         build:
             context: ./backend
             dockerfile: ./dockerfiles/postgres/Dockerfile
@@ -35,12 +37,14 @@ services:
             - "4161:4161"
     siena-nsqd:
         image: nsqio/nsq
-        command: /nsqd --broadcast-address=siena-nsqd --lookupd-tcp-address=siena-nsqlookupd:4160
+        command: /nsqd --broadcast-address=siena-nsqd --lookupd-tcp-address=siena-nsqlookupd:4160 --data-path=/data/nsqd
         ports:
           - "4150:4150"
           - "4151:4151"
         depends_on:
           - siena-nsqlookupd
+        volumes:
+            - /tmp/nsq-data:/data/nsqd
     siena-nsqadmin:
         image: nsqio/nsq
         command: /nsqadmin --lookupd-http-address=siena-nsqlookupd:4161

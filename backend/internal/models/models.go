@@ -1,12 +1,14 @@
 package models
 
-import "github.com/jmoiron/sqlx"
+import (
+	"database/sql"
+)
 
 type DataLayer interface {
 
 }
 type DataStore struct {
-	DB *sqlx.DB
+	DB *sql.DB
 }
 
 

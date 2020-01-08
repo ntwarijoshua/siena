@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	dotenv "github.com/joho/godotenv"
 	internalHttp "github.com/ntwarijoshua/siena/internal/http"
 	"github.com/ntwarijoshua/siena/internal/http/Handlers"
@@ -51,8 +52,6 @@ func loadEnvVars() {
 	}
 }
 
-
-
 func initDB() *models.DataStore {
 	dataLayer, err := storage.NewDB(storage.DBCredentials{
 		Host:     os.Getenv("DB_HOST"),
@@ -67,18 +66,26 @@ func initDB() *models.DataStore {
 	return dataLayer
 }
 
-
-
 func main() {
 	loadEnvVars()
 	appLogger := setupLogger()
-	serviceContainer := &services.ServiceContainer{DataLayer: initDB(), Logger: appLogger}
+	mainContext, cancelFunc := context.WithCancel(context.Background())
+	// clean up transactions
+	defer cancelFunc()
+	serviceContainer := &services.ServiceContainer{
+		Store:   initDB(),
+		Logger:  appLogger,
+		Context: mainContext,
+	}
 	serviceContainer.BuildServiceContainer()
 	app := Handlers.App{
-		Logger: appLogger,
+		Logger:           appLogger,
 		ServiceContainer: serviceContainer,
 	}
-	go services.StartMailerConsumer(appLogger)
+	go services.StartMailerConsumer(
+		appLogger,
+		serviceContainer.GetService("mailerService").(*services.MailerService),
+	)
 	defer app.Logger.Exit(0)
 	app.Logger.Fatal(internalHttp.GetRouter(app).Run(":8090"))
 }

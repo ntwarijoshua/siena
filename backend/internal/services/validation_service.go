@@ -1,35 +1,38 @@
 package services
 
 import (
+	"context"
 	"github.com/go-playground/locales"
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/ntwarijoshua/siena/internal/models"
 	"github.com/sirupsen/logrus"
+	"github.com/volatiletech/sqlboiler/queries/qm"
 	"gopkg.in/go-playground/validator.v9"
 	enTranslations "gopkg.in/go-playground/validator.v9/translations/en"
 )
 
-type ValidationService struct{
-	validator *validator.Validate
-	dataLayer *models.DataStore
+type ValidationService struct {
+	validator  *validator.Validate
+	dataLayer  *models.DataStore
 	translator locales.Translator
-	uni *ut.UniversalTranslator
-	lang ut.Translator
-	logger *logrus.Logger
+	uni        *ut.UniversalTranslator
+	lang       ut.Translator
+	logger     *logrus.Logger
+	context    context.Context
 }
 
-func (vs *ValidationService)GetValidator() *validator.Validate {
+func (vs *ValidationService) GetValidator() *validator.Validate {
 	return vs.validator
 }
 
-func (vs *ValidationService)InitializeValidator()  {
+func (vs *ValidationService) InitializeValidator() {
 	vs.validator = validator.New()
 	vs.translator = en.New()
 	vs.uni = ut.New(vs.translator, vs.translator)
 	_ = vs.validator.RegisterValidation("is_unique", func(fl validator.FieldLevel) bool {
 		email := fl.Field().String()
-		user, err := vs.dataLayer.GetUserByEmail(email)
+		user, err := models.Users(qm.Where("email = ?", email)).One(vs.context, vs.dataLayer.DB)
 		if err == nil && user.Email == email {
 			return false
 		}
@@ -68,12 +71,10 @@ func (vs *ValidationService)InitializeValidator()  {
 	})
 }
 
-func (vs *ValidationService)GenerateValidationResponse(err error) []string {
+func (vs *ValidationService) GenerateValidationResponse(err error) []string {
 	var errMessages []string
-	for _,e := range err.(validator.ValidationErrors) {
+	for _, e := range err.(validator.ValidationErrors) {
 		errMessages = append(errMessages, e.Translate(vs.lang))
 	}
 	return errMessages
 }
-
-

@@ -1,9 +1,9 @@
 package storage
 
 import (
+	"database/sql"
 	_ "database/sql"
 	"fmt"
-	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/ntwarijoshua/siena/internal/models"
 	logger "github.com/sirupsen/logrus"
@@ -18,14 +18,9 @@ type DBCredentials struct {
 	Password string
 }
 
-
-
 func NewDB(config DBCredentials) (*models.DataStore, error) {
 	logger.Info("Connecting to the database")
-	database, err := sqlx.Connect(
-		"postgres",
-		fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable",
-			config.Host, config.Port, config.Dbname, config.Username, config.Password))
-	return &models.DataStore{DB:database}, err
+	database, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable",
+		config.Host, config.Port, config.Dbname, config.Username, config.Password))
+	return &models.DataStore{DB: database}, err
 }
-
